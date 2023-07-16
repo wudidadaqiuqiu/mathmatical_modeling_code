@@ -7,6 +7,6 @@ class SingleV(BasicData):
     T = TypeVar('T')
 
     @classmethod
-    def create(cls, data: Union[np.array, list]) -> T:
+    def create(cls, data: Union[np.ndarray, list]) -> T:
         return cls(data)
 

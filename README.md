@@ -1,2 +1,2 @@
 # mathmatical modeling code
-大学生数学建模
+本仓库旨在使读者用极少的时间快速浏览并了解python数学建模中常用的API
