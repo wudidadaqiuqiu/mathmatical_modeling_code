@@ -26,3 +26,6 @@ class BasicData(object):
             # print(type(curve))
             ax.plot(x.data, curve.data, form)
         plt.show()
+    
+    def to_ndarray(self):
+        return self.data

@@ -11,3 +11,11 @@ class TestData(BasicData):
         x = np.linspace(start, end, num)
         y = np.vectorize(f)(x)
         return tuple(map(BasicData.create_basic_data, [x, y]))
+
+    @classmethod
+    def create_ndarray(cls, f, start: int, end: int, num: Optional[int]) -> tuple[np.ndarray, np.ndarray]:
+        x = np.linspace(start, end, num)
+        y = np.vectorize(f)(x)
+        return x, y
+    
+    
