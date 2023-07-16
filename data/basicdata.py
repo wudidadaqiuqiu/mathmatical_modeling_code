@@ -20,9 +20,9 @@ class BasicData(object):
         rich.print(self.data)
 
     @classmethod
-    def plot(cls, x: T, *curves: T) -> None:
+    def plot(cls, x: T, curves: list[T], form: str= '-') -> None:
         fig, ax = plt.subplots()
         for curve in curves:
             # print(type(curve))
-            ax.plot(x.data, curve.data)
+            ax.plot(x.data, curve.data, form)
         plt.show()
