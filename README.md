@@ -1,2 +1,2 @@
-# mathmatical_code
+# mathmatical modeling code
 大学生数学建模
