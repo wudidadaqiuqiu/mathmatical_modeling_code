@@ -1,2 +1,2 @@
 # mathmatical modeling code
-本仓库旨在使读者用极少的时间快速浏览并了解python数学建模中常用的API
+数学建模的各种例子及其对应的解
