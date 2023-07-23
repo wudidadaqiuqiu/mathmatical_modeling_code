@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from data.testdata import TestData, BasicData
+from datastructure.testdata import TestData, BasicData
 from math import sin
 def add(a,b):
     return a+b
