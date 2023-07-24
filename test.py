@@ -169,7 +169,7 @@ y2 = np.cos(x).tolist()
 # from matplotlib import animation
 # print(animation.writers.list())
 
-from datastructure.probability.pmf import PMF, merge_two_pmf, create_pmftree
+from datastructure.probability.pmf import PMF, merge_two_pmf, create_pmftree, graph_pmftree
 from rich import print
 # pm = ProbabilityMass(Point((1,2)), 1)
 # print(pm)
@@ -182,12 +182,23 @@ pmf4 = [((1,),0.3),((2,),0.7)]
 
 # pmf = dict(pmf)
 # print(pmf.keys())
-pp1, pp2, pp3, pp4 = PMF(pmf1), PMF(pmf2), PMF(pmf3), PMF(pmf4)
+pp1, pp2, pp3, pp4 = PMF(pmf1, '1'), PMF(pmf2,'2'), PMF(pmf3,'3'), PMF(pmf4,'4')
+# pp1, pp2, pp3, pp4 = PMF(pmf1), PMF(pmf2), PMF(pmf3), PMF(pmf4)
 # print(pmf4)
 # pp =merge_two_pmf(pp1, pp2)
 # print(pp)
 p_tree = create_pmftree([pp1, pp2, pp3, pp4])
-print(p_tree)
-print(p_tree.data.is_sum_one())
+
+# print(p_tree)
+# print(p_tree.data.is_sum_one())
+
+graph_pmftree(p_tree)
 # dic = {1:2,2:2}
 # print([item for item in dic.items()])
+
+# class test(object):
+#     def __init__(self) -> None:
+#         super().__init__()
+#         self.data: int = 0
+
+# print(test().__dict__)
