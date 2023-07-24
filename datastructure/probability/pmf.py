@@ -2,7 +2,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Union, Optional, TypeVar
 from queue import SimpleQueue
+import numpy as np
 from ..show.graph import draw_digraph
+from ..show.plot import plot2D
 
 @dataclass
 class Point:
@@ -33,6 +35,7 @@ class ProbabilityMassFunction(object):
         self.__data: dict[self.point, self.probability] = {}
         self.__sum_of_probability: float = 0
         self.name: str = name
+        self._expectation: float
         if not pmf:
             self.dimension = 0
             return
@@ -47,30 +50,43 @@ class ProbabilityMassFunction(object):
             raise ValueError(f'概率和不为1, {self.__sum_of_probability}')
     
     def __str__(self) -> str:
-        res = f'{self.name}\npoint\t| probability\n'
+        res = f'{self.name}\n' if self.name else ''
+        res += 'point\t| probability\n'
         for item in self.__data.items():
-            res += f'{item[0]}\t| {item[1]}\n'
+            res += f'{([num for num in item[0]])}\t| {item[1]}\n'
         return res
 
     def __repr__(self) -> str:
         return str(self)
-
+    
     def is_sum_one(self) -> bool:
             self.__sum_of_probability = round(sum([a for a in self.__data.values()]), 12)
             return self.__sum_of_probability == 1
 
-    def distribution_law(self) -> Iterable:
-        return self.__data.items()
+    def distribution_law(self) -> list:
+        return sorted(self.__data.items(), key=lambda x:x[0])
+
+    def distribution(self) -> list:
+        if self.dimension != 1:
+            return sorted(self.__data.keys())
+        return [x[0] for x in sorted(self.__data.keys())]
+
+    def expectation(self) -> float:
+        if hasattr(self, '_expectation'):
+            return self._expectation
+        assert self.dimension == 1
+        self._expectation = sum([point[0] * probability for point, probability in self.__data.items()])
+        return self._expectation
 
 PMF = ProbabilityMassFunction
-def merge_two_pmf(pmf1: PMF, pmf2: PMF) -> PMF:
+def merge_two_pmf(pmf1: PMF, pmf2: PMF, ndigits: int=5) -> PMF:
     assert pmf1.dimension == pmf2.dimension == 1
     res_pmf = PMF(None, name = pmf1.name + '+' + pmf2.name)
     res_pmf.dimension = 1
     pmf_dict = res_pmf._ProbabilityMassFunction__data
     for x1 in pmf1.distribution_law():
         for x2 in pmf2.distribution_law():
-            key = (x1[0][0] + x2[0][0],)
+            key = (round(x1[0][0] + x2[0][0], ndigits),)
             pmf_dict[key] = pmf_dict.get(key, 0) + x1[1] * x2[1]
     return res_pmf
 
@@ -146,9 +162,45 @@ class _DiGraphablePMFTree:
     
     def graph(self):
         draw_digraph(self)
+
+@dataclass
+class _Plot2DablePMF:
+    pmf: PMF
+    def get_x(self) -> list:
+        assert self.pmf.dimension == 1
+        return self.pmf.distribution()
+    
+    def get_y(self) -> list:
+        assert self.pmf.dimension == 1
+        return [x[1] for x in self.pmf.distribution_law()]
+    
+@dataclass
+class _Plot2DableCDF:
+    pmf: PMF
+    x: np.ndarray
+    y: np.ndarray
+
+    def get_x(self) -> np.ndarray:
+        assert self.pmf.dimension == 1
+        self.x = np.array(self.pmf.distribution())
+        return self.x
+    
+    def get_y(self) -> np.ndarray:
+        assert self.pmf.dimension == 1
+        self.y = np.cumsum(np.array([x[1] for x in self.pmf.distribution_law()]))
+        return self.y
     
 def graph_pmftree(root: PMFTree):
     gtree = _DiGraphablePMFTree(root)
     gtree.graph()
 
-    print(gtree.get_nodes())
+def plot_pmf(pmf: PMF):
+    assert pmf.dimension == 1
+    p = _Plot2DablePMF(pmf)
+    plot2D(p)
+
+def plot_cdf(pmf: PMF) -> tuple[np.ndarray, np.ndarray]:
+    assert pmf.dimension == 1
+    plt_cdf = _Plot2DableCDF(pmf, x=np.array([]), y=np.array([]))
+    plot2D(plt_cdf)
+    return plt_cdf.x, plt_cdf.y

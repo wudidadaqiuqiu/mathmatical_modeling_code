@@ -187,18 +187,22 @@ pp1, pp2, pp3, pp4 = PMF(pmf1, '1'), PMF(pmf2,'2'), PMF(pmf3,'3'), PMF(pmf4,'4')
 # print(pmf4)
 # pp =merge_two_pmf(pp1, pp2)
 # print(pp)
-p_tree = create_pmftree([pp1, pp2, pp3, pp4])
+# p_tree = create_pmftree([pp1, pp2, pp3, pp4])
 
 # print(p_tree)
 # print(p_tree.data.is_sum_one())
 
-graph_pmftree(p_tree)
+# graph_pmftree(p_tree)
 # dic = {1:2,2:2}
 # print([item for item in dic.items()])
 
-# class test(object):
-#     def __init__(self) -> None:
-#         super().__init__()
-#         self.data: int = 0
+class test(object):
+    def __init__(self) -> None:
+        super().__init__()
+        self.data: int = 0
 
+# print(np.array([test() for i in range(2)]))
 # print(test().__dict__)
+
+a = np.arange(80).reshape((4, 5, 4))
+print(a)
