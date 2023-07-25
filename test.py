@@ -204,5 +204,17 @@ class test(object):
 # print(np.array([test() for i in range(2)]))
 # print(test().__dict__)
 
-a = np.arange(80).reshape((4, 5, 4))
-print(a)
+# a = np.arange(80).reshape((4, 5, 4))
+# print(a)
+
+# from dataclasses import dataclass
+
+# @dataclass
+# class Test2:
+#     a: int
+#     b: int | None = None
+
+# print(Test2(1).__dict__)
+
+# import c
+

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Union, Optional, TypeVar
+from typing import Union, Optional
 from queue import SimpleQueue
 import numpy as np
 from ..show.graph import draw_digraph, DiGraphable
@@ -179,12 +179,9 @@ class _Plot2DablePMF:
         assert self.pmf.dimension == 1
         return [x[1] for x in self.pmf.distribution_law()]
 
-
 @dataclass
 class _Plot2DableCDF:
     pmf: PMF
-    x: np.ndarray
-    y: np.ndarray
 
     def get_x(self) -> np.ndarray:
         assert self.pmf.dimension == 1
@@ -195,7 +192,7 @@ class _Plot2DableCDF:
         assert self.pmf.dimension == 1
         self.y = np.cumsum(np.array([x[1] for x in self.pmf.distribution_law()]))
         return self.y
-    
+
 def graph_pmftree(root: PMFTree):
     gtree: DiGraphable[PMFTree] = _DiGraphablePMFTree(root)
     draw_digraph(gtree)
@@ -213,5 +210,6 @@ def plot_cdf(pmf: PMF) -> tuple[np.ndarray, np.ndarray]:
 
 def create_cdf(pmf: PMF) -> tuple[np.ndarray, np.ndarray]:
     assert pmf.dimension == 1
-    return np.array(pmf.distribution()), np.cumsum(
-        np.array([x[1] for x in pmf.distribution_law()]))
+    l = [np.array(pmf.distribution()), np.cumsum(
+        np.array([x[1] for x in pmf.distribution_law()]))]
+    return tuple([vec.reshape(1, vec.shape[0])[0] for vec in l])
