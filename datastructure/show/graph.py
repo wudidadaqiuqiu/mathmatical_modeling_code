@@ -1,14 +1,15 @@
 from typing import Protocol
-from collections.abc import Hashable
+# from collections.abc import Hashable
+from typing import Hashable, TypeVar, Generic
 import networkx as nx
 import matplotlib.pyplot as plt
 
 
-Node = Hashable
+Node = TypeVar('Node', bound=Hashable)
 Edge = tuple[Node, Node]
 Label = str
 
-class DiGraphable(Protocol):
+class DiGraphable(Generic[Node], Protocol):
     def get_nodes(self) -> list[Node]:
         ...
     def get_edges(self) -> list[Edge]:

@@ -1,9 +1,10 @@
+from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Union, Optional, TypeVar
 from queue import SimpleQueue
 import numpy as np
-from ..show.graph import draw_digraph
+from ..show.graph import draw_digraph, DiGraphable
 from ..show.plot import plot2D
 
 @dataclass
@@ -27,12 +28,13 @@ class ProbabilityMass:
     def __repr__(self) -> str:
         return str(self)
 
+point = tuple
+probability = float
+
 class ProbabilityMassFunction(object):
-    point = tuple
-    probability = float
     def __init__(self, pmf: Union[list[tuple[point, probability]], dict[point, probability], None], name: str='') -> None:
         super().__init__()
-        self.__data: dict[self.point, self.probability] = {}
+        self._data: dict[point, probability] = {}
         self.__sum_of_probability: float = 0
         self.name: str = name
         self._expectation: float
@@ -40,11 +42,11 @@ class ProbabilityMassFunction(object):
             self.dimension = 0
             return
         self.dimension = len(pmf[0][0]) if isinstance(pmf, list) else len(list(pmf.keys())[0])
-        pmf: list = pmf if isinstance(pmf, list) else pmf.items()
-        for pm in pmf:
+        pmf_: Iterable = pmf if isinstance(pmf, list) else pmf.items()
+        for pm in pmf_:
             if len(pm[0]) != self.dimension:
                 raise ValueError(f'{self.dimension}, {pm[0]}')
-            self.__data[pm[0]] = pm[1]
+            self._data[pm[0]] = pm[1]
             self.__sum_of_probability += pm[1]
         if not self.is_sum_one():
             raise ValueError(f'概率和不为1, {self.__sum_of_probability}')
@@ -52,7 +54,7 @@ class ProbabilityMassFunction(object):
     def __str__(self) -> str:
         res = f'{self.name}\n' if self.name else ''
         res += 'point\t| probability\n'
-        for item in self.__data.items():
+        for item in self._data.items():
             res += f'{([num for num in item[0]])}\t| {item[1]}\n'
         return res
 
@@ -60,30 +62,33 @@ class ProbabilityMassFunction(object):
         return str(self)
     
     def is_sum_one(self) -> bool:
-            self.__sum_of_probability = round(sum([a for a in self.__data.values()]), 12)
+            self.__sum_of_probability = round(sum([a for a in self._data.values()]), 12)
             return self.__sum_of_probability == 1
 
     def distribution_law(self) -> list:
-        return sorted(self.__data.items(), key=lambda x:x[0])
+        return sorted(self._data.items(), key=lambda x:x[0])
 
     def distribution(self) -> list:
         if self.dimension != 1:
-            return sorted(self.__data.keys())
-        return [x[0] for x in sorted(self.__data.keys())]
+            return sorted(self._data.keys())
+        return [x[0] for x in sorted(self._data.keys())]
 
     def expectation(self) -> float:
         if hasattr(self, '_expectation'):
             return self._expectation
         assert self.dimension == 1
-        self._expectation = sum([point[0] * probability for point, probability in self.__data.items()])
+        self._expectation = sum([point[0] * probability for point, probability in self._data.items()])
         return self._expectation
+    
+    def plot(self):
+        plot_pmf(self)
 
 PMF = ProbabilityMassFunction
 def merge_two_pmf(pmf1: PMF, pmf2: PMF, ndigits: int=5) -> PMF:
     assert pmf1.dimension == pmf2.dimension == 1
     res_pmf = PMF(None, name = pmf1.name + '+' + pmf2.name)
     res_pmf.dimension = 1
-    pmf_dict = res_pmf._ProbabilityMassFunction__data
+    pmf_dict = res_pmf._data
     for x1 in pmf1.distribution_law():
         for x2 in pmf2.distribution_law():
             key = (round(x1[0][0] + x2[0][0], ndigits),)
@@ -91,12 +96,11 @@ def merge_two_pmf(pmf1: PMF, pmf2: PMF, ndigits: int=5) -> PMF:
     return res_pmf
 
 class PMFTree(object):
-    T = TypeVar('T')
-    def __init__(self, father: Optional[T]) -> None:
+    def __init__(self, father: Optional[PMFTree]) -> None:
         super().__init__()
-        self.father: Optional[self.T] = father
-        self.lchild: self.T
-        self.rchild: self.T
+        self.father: Optional[PMFTree] = father
+        self.lchild: PMFTree
+        self.rchild: PMFTree
         self.data: PMF
     
     def __str__(self) -> str:
@@ -108,8 +112,11 @@ class PMFTree(object):
     def __hash__(self) -> int:
         return hash((self.data))
     
-    def __eq__(self, __value: object) -> bool:
+    def __eq__(self, __value: PMFTree) -> bool:
         return self.data == __value.data
+    
+    def graph(self):
+        graph_pmftree(self)
 
 def create_pmftree(pmfs: list[PMF], father: Optional[PMFTree]=None) -> PMFTree:
     """生成的树的叶子节点有data,没有child属性"""
@@ -160,8 +167,6 @@ class _DiGraphablePMFTree:
     def get_edges_labels(self):
         return {}
     
-    def graph(self):
-        draw_digraph(self)
 
 @dataclass
 class _Plot2DablePMF:
@@ -173,7 +178,8 @@ class _Plot2DablePMF:
     def get_y(self) -> list:
         assert self.pmf.dimension == 1
         return [x[1] for x in self.pmf.distribution_law()]
-    
+
+
 @dataclass
 class _Plot2DableCDF:
     pmf: PMF
@@ -191,8 +197,8 @@ class _Plot2DableCDF:
         return self.y
     
 def graph_pmftree(root: PMFTree):
-    gtree = _DiGraphablePMFTree(root)
-    gtree.graph()
+    gtree: DiGraphable[PMFTree] = _DiGraphablePMFTree(root)
+    draw_digraph(gtree)
 
 def plot_pmf(pmf: PMF):
     assert pmf.dimension == 1
@@ -204,3 +210,8 @@ def plot_cdf(pmf: PMF) -> tuple[np.ndarray, np.ndarray]:
     plt_cdf = _Plot2DableCDF(pmf, x=np.array([]), y=np.array([]))
     plot2D(plt_cdf)
     return plt_cdf.x, plt_cdf.y
+
+def create_cdf(pmf: PMF) -> tuple[np.ndarray, np.ndarray]:
+    assert pmf.dimension == 1
+    return np.array(pmf.distribution()), np.cumsum(
+        np.array([x[1] for x in pmf.distribution_law()]))
