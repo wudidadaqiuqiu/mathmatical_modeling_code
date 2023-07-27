@@ -196,10 +196,10 @@ pp1, pp2, pp3, pp4 = PMF(pmf1, '1'), PMF(pmf2,'2'), PMF(pmf3,'3'), PMF(pmf4,'4')
 # dic = {1:2,2:2}
 # print([item for item in dic.items()])
 
-class test(object):
-    def __init__(self) -> None:
-        super().__init__()
-        self.data: int = 0
+# class test(object):
+#     def __init__(self) -> None:
+#         super().__init__()
+#         self.data: int = 0
 
 # print(np.array([test() for i in range(2)]))
 # print(test().__dict__)
@@ -218,3 +218,11 @@ class test(object):
 
 # import c
 
+from datastructure.graph.undirectedgraph import UnDiGraph
+from datastructure.graph.algorithm import floyd_shortest_path
+# import sys
+# print(sys.path)
+a: UnDiGraph[int] =UnDiGraph(set([1,2,3,4]), [(1,3, 10), (1,4,60),(2,3,5),(2,4,20),(3,4,1)])
+# print(a.edges())
+a1,b, c = floyd_shortest_path(a)
+print(a1)
