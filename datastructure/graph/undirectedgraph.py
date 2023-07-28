@@ -5,7 +5,7 @@ Node = TypeVar('Node', bound=Hashable)
 Edge = tuple[Node, Node, Num]
 
 class UnDiGraph(Generic[Node], object):
-    def __init__(self, nodes: set[Node], edges: list[Edge] | None | dict[Node, list[Num]]=None) -> None:
+    def __init__(self, nodes: set[Node], edges: list[Edge] | None =None) -> None:
         super().__init__()
         self.nodes: set[Node] = nodes  # 不变量，node不重复
         _edges: list[Edge] = []
@@ -15,8 +15,8 @@ class UnDiGraph(Generic[Node], object):
             self.add_edges(_edges)
             return
         assert isinstance(edges, dict)
-        for node in self.nodes:
-            pass
+        # for node in self.nodes:
+        #     pass
         raise
         
     def add_nodes(self, nodes: set[Node] | list[Node]):
