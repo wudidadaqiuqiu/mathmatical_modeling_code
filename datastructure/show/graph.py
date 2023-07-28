@@ -23,7 +23,10 @@ def draw_digraph(graph: DiGraphable):
     G = nx.DiGraph()
     G.add_nodes_from(graph.get_nodes())
     G.add_edges_from(graph.get_edges())
-    pos = nx.spring_layout(G)
+    # pos = nx.spring_layout(G)
+    pos = nx.shell_layout(G)
+    # pos = nx.spectral_layout(G)
+    # pos = nx.circular_layout(G)
     nx.draw(G, pos)
 
     node_lables = graph.get_nodes_labels()
