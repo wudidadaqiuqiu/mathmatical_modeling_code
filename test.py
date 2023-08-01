@@ -192,7 +192,7 @@ p_tree = create_pmftree([pp1, pp2, pp3, pp4])
 # print(p_tree)
 # print(p_tree.data.is_sum_one())
 
-graph_pmftree(p_tree)
+# graph_pmftree(p_tree)
 # dic = {1:2,2:2}
 # print([item for item in dic.items()])
 
@@ -218,11 +218,55 @@ graph_pmftree(p_tree)
 
 # import c
 
-from datastructure.graph.undirectedgraph import UnDiGraph
-from datastructure.graph.algorithm import floyd_shortest_path
-# import sys
-# print(sys.path)
-a: UnDiGraph[int] =UnDiGraph(set([1,2,3,4]), [(1,3, 10), (1,4,60),(2,3,5),(2,4,20),(3,4,1)])
-# print(a.edges())
-a1,b, c = floyd_shortest_path(a)
-print(a1)
+# from datastructure.graph.undirectedgraph import UnDiGraph
+# from datastructure.graph.algorithm import floyd_shortest_path
+# # import sys
+# # print(sys.path)
+# a: UnDiGraph[int] =UnDiGraph(set([1,2,3,4]), [(1,3, 10), (1,4,60),(2,3,5),(2,4,20),(3,4,1)])
+# # print(a.edges())
+# a1,b, c = floyd_shortest_path(a)
+# print(a1)
+
+
+import networkx as nx
+import matplotlib.pyplot as plt
+from pyvis.network import Network
+
+# Step 1: 构建图的数据结构
+G = nx.Graph()
+edges = [(1, 2, 3), (1, 3, 2), (2, 3, 4), (2, 4, 1), (3, 4, 5)]
+G.add_weighted_edges_from(edges)
+
+# Step 2: 应用最小生成树算法
+mst_edges = nx.minimum_spanning_edges(G, algorithm='prim', data=False)
+mst = nx.Graph(list(mst_edges))
+
+# Step 3: 可视化
+# 创建动态网络可视化对象
+nt = Network(notebook=True)
+
+# 添加原始图的节点和边
+for node in G.nodes():
+    nt.add_node(node)
+
+for edge in G.edges():
+    nt.add_edge(edge[0], edge[1])
+
+# 展示原始图
+nt.show("original_graph.html")
+
+# 添加最小生成树的节点和边，并用动态效果展示生成过程
+nt_bfs = Network(notebook=True)
+
+for node in G.nodes():
+    nt_bfs.add_node(node)
+
+for edge in mst.edges():
+    nt_bfs.add_edge(edge[0], edge[1])
+
+# 以动态效果展示生成最小生成树的过程
+for edge in mst.edges():
+    nt_bfs.highlight(Edge=edge)
+    nt_bfs.show_buttons(filter_=['nodes', 'edges', 'physics'])
+    nt_bfs.show("minimum_spanning_tree.html")
+
