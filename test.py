@@ -279,9 +279,9 @@ p_tree = create_pmftree([pp1, pp2, pp3, pp4])
 # ll = [1,2,3]
 # print(c(ll), ll)
 
-from datastructure.graph.directedgraph import DirectedEdge, DirectedGrapph, SPDiGraph
+from datastructure.graph.directedgraph import DirectedEdge, DirectedGraph, SPDiGraph
 from datastructure.graph.algorithm import bellman_ford_shortest_path
-g = DirectedGrapph()
+g = DirectedGraph()
 g.add_nodes(range(1, 10))
 # print(g.nodes)
 g.add_edges([DirectedEdge(*t) for t in [(1,2,6), (1,3,3),(1,4,1),(2,5,1),(3,2,2),(3,4,2),
@@ -293,5 +293,46 @@ spg = SPDiGraph(g, 1)
 print(*bellman_ford_shortest_path(spg, spg.start))
 print(spg.edgeto)
 print(spg.dist)
-# print(spg.edgeto)
-# print(spg.dist)
+# # print(spg.edgeto)
+# # print(spg.dist)
+
+
+# import networkx as nx
+# import matplotlib.pyplot as plt
+
+# # 创建带有权重的图
+# G = nx.Graph()
+# G.add_edge('Node1', 'Node2', weight=5)
+# G.add_edge('Node1', 'Node3', weight=10)
+# G.add_edge('Node2', 'Node3', weight=7)
+
+# # 使用 kamada_kawai_layout 布局算法计算节点的位置布局
+# pos = nx.kamada_kawai_layout(G, weight='weight', scale=100)
+
+# # 绘制带有权重的图，边的长度根据权重来设置
+# edge_labels = {(u, v): d['weight'] for u, v, d in G.edges(data=True)}
+# nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=1000, font_size=12)
+# nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=10)
+
+# # 显示图形
+# plt.show()
+
+
+# def gg():
+#     yield 1
+#     yield 2
+#     yield 3
+#     return 4
+# b = gg()
+# print(next(b))
+# print(next(b))
+# print(next(b))
+# try:
+#     print(next(b))  # 输出 3，并在下一次调用时引发 StopIteration 异常
+# except StopIteration as e:
+#     print(f"StopIteration: {e}")
+# print(next(b))
+# print(a)
+
+# while (a:=next(gg())):
+    # print(a)

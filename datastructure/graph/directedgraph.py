@@ -15,16 +15,19 @@ class DirectedEdge(object):
     def __repr__(self) -> str:
         return str(self)
     
-class DirectedGrapph(object):
+class DirectedGraph(object):
     def __init__(self) -> None:
         super().__init__()
         self.to_node_dict: dict[Node, list[DirectedEdge]] = {}
         self.from_node_dict = {}
-        self.edges = []
+        self.edges: list[DirectedEdge] = []
         self.nodes = set()
         self.V = 0
         self.E = 0
     
+    def get_edges(self):
+        return [(edge.from_nd, edge.to_nd, edge.weight) for edge in self.edges]
+
     def add_node(self, node: Node):
         self.nodes.add(node)
         self.V += 1
@@ -46,13 +49,13 @@ class DirectedGrapph(object):
             self.add_edge(edge)
 
 class SPDiGraph(object):
-    def __init__(self, digraph: DirectedGrapph, start: Node) -> None:
-        self.digraph: DirectedGrapph = digraph
+    def __init__(self, digraph: DirectedGraph, start: Node) -> None:
+        self.digraph: DirectedGraph = digraph
         assert start in digraph.nodes
         self.start: Node = start
         self.dist = {start : 0}
         self.edgeto: dict[Node, DirectedEdge | None] = {}
-        self.bellman_ford_shortest_path(self.start)
+        # self.bellman_ford_shortest_path(self.start)
         # for res in self.dijkstra():
         #     pass
 
