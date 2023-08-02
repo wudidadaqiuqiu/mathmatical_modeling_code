@@ -228,45 +228,70 @@ p_tree = create_pmftree([pp1, pp2, pp3, pp4])
 # print(a1)
 
 
-import networkx as nx
-import matplotlib.pyplot as plt
-from pyvis.network import Network
+# import networkx as nx
+# import matplotlib.pyplot as plt
+# from pyvis.network import Network
 
-# Step 1: 构建图的数据结构
-G = nx.Graph()
-edges = [(1, 2, 3), (1, 3, 2), (2, 3, 4), (2, 4, 1), (3, 4, 5)]
-G.add_weighted_edges_from(edges)
+# # Step 1: 构建图的数据结构
+# G = nx.Graph()
+# edges = [(1, 2, 3), (1, 3, 2), (2, 3, 4), (2, 4, 1), (3, 4, 5)]
+# G.add_weighted_edges_from(edges)
 
-# Step 2: 应用最小生成树算法
-mst_edges = nx.minimum_spanning_edges(G, algorithm='prim', data=False)
-mst = nx.Graph(list(mst_edges))
+# # Step 2: 应用最小生成树算法
+# mst_edges = nx.minimum_spanning_edges(G, algorithm='prim', data=False)
+# mst = nx.Graph(list(mst_edges))
 
-# Step 3: 可视化
-# 创建动态网络可视化对象
-nt = Network(notebook=True)
+# # Step 3: 可视化
+# # 创建动态网络可视化对象
+# nt = Network(notebook=True)
 
-# 添加原始图的节点和边
-for node in G.nodes():
-    nt.add_node(node)
+# # 添加原始图的节点和边
+# for node in G.nodes():
+#     nt.add_node(node)
 
-for edge in G.edges():
-    nt.add_edge(edge[0], edge[1])
+# for edge in G.edges():
+#     nt.add_edge(edge[0], edge[1])
 
-# 展示原始图
-nt.show("original_graph.html")
+# # 展示原始图
+# nt.show("original_graph.html")
 
-# 添加最小生成树的节点和边，并用动态效果展示生成过程
-nt_bfs = Network(notebook=True)
+# # 添加最小生成树的节点和边，并用动态效果展示生成过程
+# nt_bfs = Network(notebook=True)
 
-for node in G.nodes():
-    nt_bfs.add_node(node)
+# for node in G.nodes():
+#     nt_bfs.add_node(node)
 
-for edge in mst.edges():
-    nt_bfs.add_edge(edge[0], edge[1])
+# for edge in mst.edges():
+#     nt_bfs.add_edge(edge[0], edge[1])
 
-# 以动态效果展示生成最小生成树的过程
-for edge in mst.edges():
-    nt_bfs.highlight(Edge=edge)
-    nt_bfs.show_buttons(filter_=['nodes', 'edges', 'physics'])
-    nt_bfs.show("minimum_spanning_tree.html")
+# # 以动态效果展示生成最小生成树的过程
+# for edge in mst.edges():
+#     nt_bfs.highlight(Edge=edge)
+#     nt_bfs.show_buttons(filter_=['nodes', 'edges', 'physics'])
+#     nt_bfs.show("minimum_spanning_tree.html")
 
+
+# def c(l):
+#     l[0] = 100
+#     l.append(20)
+#     l.pop(0)
+#     return l
+# ll = [1,2,3]
+# print(c(ll), ll)
+
+from datastructure.graph.directedgraph import DirectedEdge, DirectedGrapph, SPDiGraph
+from datastructure.graph.algorithm import bellman_ford_shortest_path
+g = DirectedGrapph()
+g.add_nodes(range(1, 10))
+# print(g.nodes)
+g.add_edges([DirectedEdge(*t) for t in [(1,2,6), (1,3,3),(1,4,1),(2,5,1),(3,2,2),(3,4,2),
+                                        (4,6,10),(5,4,6),(5,6,4),(5,7,3),(5,8,6),(6,5,10),
+                                        (6,7,2),(7,8,4),(9,5,2),(9,8,3)]])
+# print(g.edges)
+# print(g.to_node_dict)
+spg = SPDiGraph(g, 1)
+print(*bellman_ford_shortest_path(spg, spg.start))
+print(spg.edgeto)
+print(spg.dist)
+# print(spg.edgeto)
+# print(spg.dist)

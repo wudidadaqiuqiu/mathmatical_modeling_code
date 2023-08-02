@@ -1,7 +1,10 @@
-from .undirectedgraph import UnDiGraph
+from ..interator import IterQueue, improved_brofir_iter
+from .directedgraph import DirectedEdge, DirectedGrapph, SPDiGraph
+from .undirectedgraph import UnDiGraph, Node
 import numpy as np
 
 ShortestPathGraph = UnDiGraph
+ShortestPathNode = Node
 
 def floyd_shortest_path(graph: ShortestPathGraph):
     A, B, node_dict, lenth = *floyd_mat(graph), len(graph.nodes)
@@ -33,3 +36,20 @@ def scan_matrix(mat: np.ndarray):
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
             yield i, j
+
+def bellman_ford_shortest_path(graph: SPDiGraph, node: Node):
+        assert node in graph.digraph.nodes
+        q, V, i, cycle_in = IterQueue([node]), graph.digraph.V, 0, []
+        def one_round(qe: IterQueue):
+            nonlocal i, cycle_in
+            if i == V:
+                cycle_in = q.pop_queue()
+                return []
+            i += 1
+            return sum([relaxed_nodes for item in qe.pop_queue(
+                    ) if (relaxed_nodes := graph.node_relax(item))], [])
+        def added_condition(nd: Node, qe: IterQueue):
+            return False if nd in qe.get_queue() else True
+        for node in improved_brofir_iter(graph, q, one_round, added_condition, q):
+            pass
+        return cycle_in, i
