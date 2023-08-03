@@ -289,10 +289,10 @@ g.add_edges([DirectedEdge(*t) for t in [(1,2,6), (1,3,3),(1,4,1),(2,5,1),(3,2,2)
                                         (6,7,2),(7,8,4),(9,5,2),(9,8,3)]])
 # print(g.edges)
 # print(g.to_node_dict)
-spg = SPDiGraph(g, 1)
-print(*bellman_ford_shortest_path(spg, spg.start))
-print(spg.edgeto)
-print(spg.dist)
+# spg = SPDiGraph(g, 1)
+# print(*bellman_ford_shortest_path(spg, spg.start))
+# print(spg.edgeto)
+# print(spg.dist)
 # # print(spg.edgeto)
 # # print(spg.dist)
 
@@ -336,3 +336,120 @@ print(spg.dist)
 
 # while (a:=next(gg())):
     # print(a)
+
+import pandas as pd
+import gurobipy as gp
+from gurobipy import GRB
+
+def sensitivity_analysis(c, A, b):
+    try:
+        # Create a model
+        model = gp.Model()
+
+        # Add decision variables
+        num_vars = len(c)
+        x = model.addVars(num_vars, lb=0.0, vtype=GRB.CONTINUOUS, name="x")
+
+        # Set the objective function
+        model.setObjective(gp.quicksum(c[i] * x[i] for i in range(num_vars)), GRB.MAXIMIZE)
+
+        # Add constraints
+        num_constraints = len(b)
+        model.addConstrs(gp.quicksum(A[j][i] * x[i] for i in range(num_vars)) <= b[j] for j in range(num_constraints))
+
+        # Solve the linear programming problem
+        model.optimize()
+
+        # Output optimal solution
+        print("Optimal Solution:")
+        print([x[i].X for i in range(num_vars)])
+
+        # Output optimal value
+        print("Optimal Value:")
+        print(model.objVal)
+
+        # Output reduced cost
+        print("Reduced Cost:")
+        for var in range(num_vars):
+            print(f"Reduced cost for x[{var}]: {x[var].RC}")
+
+        # Output slack variables and shadow prices
+        print("Slack Variables and Shadow Prices:")
+        for constraint in range(num_constraints):
+            slack = model.getConstrByName(f'c{constraint}').Slack
+            shadow_price = model.getConstrByName(f'c{constraint}').Pi
+            print(f"Slack variable for constraint {constraint}: {slack}")
+            print(f"Shadow price for constraint {constraint}: {shadow_price}")
+
+        # Output sensitivity analysis for objective coefficients
+        print("Sensitivity Analysis for Objective Coefficients:")
+        for var in range(num_vars):
+            for coef_change in [-1, 0, 1]:
+                model.setObjective(x[var] + coef_change, GRB.MAXIMIZE)
+                model.optimize()
+                print(f"Coefficient change for x[{var}]: {coef_change}, Optimal Solution: {[x[i].X for i in range(num_vars)]}, Optimal Value: {model.objVal}")
+
+        # Output sensitivity analysis for right-hand side coefficients
+        print("Sensitivity Analysis for Right-Hand Side Coefficients:")
+        for constraint in range(num_constraints):
+            for rhs_change in [-1, 0, 1]:
+                model.getConstrByName(f'c{constraint}').rhs += rhs_change
+                model.optimize()
+                print(f"Right-Hand Side change for constraint {constraint}: {rhs_change}, Optimal Solution: {[x[i].X for i in range(num_vars)]}, Optimal Value: {model.objVal}")
+
+    except gp.GurobiError as e:
+        print(f"Error code {e.errno}: {e}")
+
+# Define the coefficients and constraints
+c = [3, 2]  # Objective function coefficients
+A = [[-1, 1], [3, 1], [1, 2]]  # Coefficient matrix for constraints
+b = [2, 5, 4]  # Right-hand side vector for constraints
+
+# Perform sensitivity analysis
+# sensitivity_analysis(c, A, b)
+
+def LP_Model_Analysis(MODEL,precision=3):
+    if MODEL.status == gp.GRB.Status.OPTIMAL:
+        pd.set_option('display.precision', precision)
+        #设置精度
+        print("\nGlobal optimal solution found.")
+        print(f"Objective Sense:{'MINIMIZE' if MODEL.ModelSense ==1 else 'MAXIMIZE'}")
+        print(f"Objective Value =MODEL.ObjVal")
+        try:
+            print(pd.DataFrame([[var.X, var.RC]for var in MODEL.getVars()],
+                               index=[var.Varname for var in MODEL.getVars()],
+                               columns=["Value", "Reduced Cost"]))
+            print(pd.DataFrame([[Constr.Slack, Constr.pi] for Constr in MODEL.getConstrs()],
+                               index=[Constr.constrName for Constr in MODEL.getConstrs()],
+                               columns=["Slack or Surplus","DualPrice"]))
+            print("\nRanges in which the basis is unchanged:")
+            print(pd.DataFrame([[var.Obj,var.SAObjLow,var.SAObjUp]for var in MODEL.getVars()],
+                               index=[var.Varname for var in MODEL.getVars()],
+                               columns=["Cofficient","Allowable Min-imize","Allowable Maximize"]))
+            print("Righthand Side Ranges:")
+            print(pd.DataFrame([[Constr.RHS, Constr.SARHSLow, Constr.SARHSUp] for Constr in MODEL.getConstrs()], 
+                               index=[Constr.constrName for Constr in MODEL.getConstrs()],
+                               columns=["RHS","Allowable Minimize","Allowable Maximize"]))
+        except:
+            print(pd.DataFrame([var.X for var in MODEL.getVars()],
+                               index=[var.Varname for var in MODEL.getVars()],
+                               columns=["Value"]))
+            print(pd.DataFrame([Constr.Slack for Constr in MODEL.getConstrs()],
+                               index=[Constr.constrName for Constr in MODEL.getConstrs()],
+                               columns=["Slack or Surplus"]))
+
+model = gp.Model()
+x = model.addVars(range(1, 7), name='x')
+model.update()
+Const = [24, 16, 44, 32, -3, -3]
+model.setObjective(sum(x[i+1] * Const[i] for i in range(6)), sense=gp.GRB.MAXIMIZE)
+
+model.addConstr(1/3 * (x[1]+x[5]) + 1/4 * (x[2]+x[6]) <= 50, name='Milk')
+model.addConstr(4 * (x[1]+x[5]) + 2 * (x[2]+x[6]) + 2 * (x[5]+x[6]) <= 480, name='Time')
+model.addConstr(x[1] + x[5] <= 100, name='CPCT')
+model.addConstr(x[3] - 0.8 * x[5] == 0)
+model.addConstr(x[4] - 3/4 * x[6] == 0)
+
+model.optimize()
+print('Obj:', model.objVal)
+LP_Model_Analysis(model)
